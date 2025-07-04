@@ -86,9 +86,10 @@ bool NachiDriver::read(sensor_msgs::msg::JointState& msg)
   if (get_joint_states())
   {
     // Return current joint position
-    // msg.header.stamp = rclcpp::Time::now();
+    msg.header.stamp = rclcpp::Time();
     msg.name = joint_names;
     msg.position = current_joint_position;
+    
     return true;
   }
 
@@ -198,11 +199,13 @@ bool NachiDriver::get_joint_states()
     {
       //printf("Axis%d angle: %8.2f[deg]\n", (nAxis + 1), fValue[nAxis]);
       curr_js_temp.push_back(fValue[nAxis] * TO_RAD);
+
       if (nAxis == 1)
       {
-          curr_js_temp[nAxis] -= M_PI_2;
+        curr_js_temp[nAxis] -= M_PI_2;
       }
     }
+
     for (int i = 0; i < (int)joint_names.size(); i++)
     {
       current_joint_position[i] = curr_js_temp[i];
@@ -242,7 +245,7 @@ bool NachiDriver::set_joint_states(std::vector<double> js_cmd, bool accurate)
     // Here we offset the output value of axis 2
     if (i == 1)
     {
-        fAngle[i] += 90.0;
+      fAngle[i] += 90.0;
     }
   }
   // NR_CtrlMoveJ: Move joint to absolute position
@@ -406,7 +409,7 @@ bool NachiDriver::execute_trajectory(trajectory_msgs::msg::JointTrajectory traje
   }
   else
   {
-    set_speed_percentage(TOP_SPEED/2);  
+    set_speed_percentage(TOP_SPEED / 2);  
   }
 
   RCLCPP_WARN(rclcpp::get_logger(LOGGER_NAME), "Robot speed = %f", get_speed_percentage());
